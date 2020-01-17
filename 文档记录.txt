@@ -1,0 +1,30 @@
+gopacket 阅读记录
+
+pcap: pcap允许GoPacket的用户从数据流或pcap文件中读取数据包。
+	
+	读取pcap文件：（pcap允许GoPacket的用户从数据流或pcap文件中读取数据包。）
+	例如：
+
+	if handle, err := pcap.OpenOffline("/path/to/my/file"); err != nil {
+   		panic(err)
+ 	} else {
+   		packetSource := gopacket.NewPacketSource(handle, handle.LinkType())
+   		for packet := range packetSource.Packets() {
+     		handlePacket(packet)  // Do something with a packet here.
+   		}
+	}
+
+	读取实时数据包：
+	例如：
+ 	if handle, err := pcap.OpenLive("eth0", 1600, true, pcap.BlockForever); err != nil {
+   		panic(err)
+ 	} else if err := handle.SetBPFFilter("tcp and port 80"); err != nil {  // optional
+   		panic(err)
+ 	} else {
+   		packetSource := gopacket.NewPacketSource(handle, handle.LinkType())
+		for packet := range packetSource.Packets() {
+     		handlePacket(packet)  // Do something with a packet here.
+   		}
+ 	}
+
+ 	

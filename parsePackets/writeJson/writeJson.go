@@ -7,22 +7,26 @@ import (
 )
 
 type Vidata struct {
-	//State0       string `json:"state0, string"`
-	//State1       string `json:"state1, string"`
-	SrcMAC       string `json:"src_mac"`
-	DstMAC       string `json:"dst_mac"`
-	SrcIP        string `json:"src_ip"`
-	DstIP        string `json:"dst_ip"`
-	SrcIpv6      string `json:"src_ipv6"`
-	DstIpv6      string `json:"dst_ipv6"`
-	SrcPort      string `json:"src_port"`
-	DstPort      string `json:"dst_port"`
-	Url          string `json:"url, string"`
-	Ua           string `json:"ua, string"`
-	HttpRequest  string `json:"http_request"`
-	HttpResponse string `json:"http_response"`
-	//Reffer string `json:"reffer, string"`
-	//Cookie string `json:"cookie, string"`
+	CaptureFilename string `json:"capture_filename"`
+	Frame           int64  `json:"frame"`
+	Time            string `json:"time"`
+	FrameBytes      int64  `json:"frame_bytes"`
+	SrcMAC          string `json:"src_mac"`
+	DstMAC          string `json:"dst_mac"`
+	SrcIP           string `json:"src_ip"`
+	DstIP           string `json:"dst_ip"`
+	SrcIpv6         string `json:"src_ipv6"`
+	DstIpv6         string `json:"dst_ipv6"`
+	SrcPort         string `json:"src_port"`
+	DstPort         string `json:"dst_port"`
+	IPVersion       string `json:"ip_version"`
+	TCPFlags        string `json:"tcp_flags"`
+	Identification  int    `json:"identification"`
+	Seq             uint32 `json:"seq"`
+	Ack             uint32 `json:"ack"`
+	PayloadBytes    int    `json:"payload_bytes"`
+	Payload         string `json:"payload"`
+	SysName         string `json:"sys_name"`
 }
 
 func write(tmpdate Vidata, file_fd *os.File) error {

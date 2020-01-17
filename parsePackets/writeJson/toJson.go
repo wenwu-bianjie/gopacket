@@ -27,7 +27,6 @@ func macprocess(mac string) string {
 func findurl(date string) (string, string) {
 	urlitems := strings.Split(date, " ")
 	if 2 > len(urlitems) {
-		fmt.Println("urlitems < 2")
 		return "", ""
 	}
 	var Url string
@@ -104,7 +103,7 @@ func printPacketInfo(packet gopacket.Packet) {
 	applicationLayer := packet.ApplicationLayer()
 	if applicationLayer != nil {
 		fmt.Println("Application layer/Payload found.")
-		fmt.Printf("%s\n", applicationLayer.Payload())
+		//fmt.Printf("%s\n", applicationLayer.Payload())
 
 		// Search for a string inside the payload
 		if strings.Contains(string(applicationLayer.Payload()), "HTTP") {
@@ -148,33 +147,10 @@ func WritePacketjson(packet gopacket.Packet, file_fd *os.File) error {
 		tcp, _ := tcpLayer.(*layers.TCP)
 		tmpdate.SrcPort = tcp.SrcPort.String()
 		tmpdate.DstPort = tcp.DstPort.String()
-	}
-
-	// When iterating through packet.Layers() above,
-	// if it lists Payload layer then that is the same as
-	// this applicationLayer. applicationLayer contains the payload
-	applicationLayer := packet.ApplicationLayer()
-	if applicationLayer != nil {
-		//fmt.Println("Application layer/Payload found.")
-
-		// Search for a string inside the payload
-		payloadStr := string(applicationLayer.Payload())
-		for _, verb := range httpMethods {
-			if strings.Contains(payloadStr, verb) {
-				tmpdate.Url, tmpdate.Ua = findurl(string(applicationLayer.Payload()))
-				tmpdate.HttpRequest = strings.ReplaceAll(string(applicationLayer.Payload()), "\r\n", "  ")
-				break
-			}
-		}
-
-		if strings.Contains(payloadStr, "Content-Type") {
-			tmpdate.Url, tmpdate.Ua = findurl(string(applicationLayer.Payload()))
-			response := strings.Split(string(applicationLayer.Payload()), "\r\n\r\n")
-			if len(response) > 0 {
-				fmt.Printf("%v\n", response)
-				tmpdate.HttpResponse = strings.ReplaceAll(response[0], "\r\n", "  ")
-			}
-		}
+		tmpdate.Payload = string(tcp.Payload)
+		tmpdate.PayloadBytes = len(tcp.Payload)
+		tmpdate.Seq = tcp.Seq
+		tmpdate.Ack = tcp.Ack
 	}
 
 	// Check for errors

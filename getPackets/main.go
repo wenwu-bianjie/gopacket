@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"sync"
 	"time"
 
 	"flag"
@@ -21,10 +20,8 @@ var (
 	timeout     time.Duration = -1 * time.Second
 )
 
-var lck sync.Mutex
-
 var (
-	pcapFile string = "./test3.pcap"
+	pcapFile string = "./test4.pcap"
 )
 
 var filter = flag.String("f", "tcp", "BPF filter for pcap")
@@ -68,7 +65,6 @@ func main() {
 }
 
 func getPacket(deviceName string, packetChan chan gopacket.Packet) {
-	lck.Lock()
 	// Open output pcap file and write header
 
 	// Open the device for capturing
@@ -80,11 +76,9 @@ func getPacket(deviceName string, packetChan chan gopacket.Packet) {
 
 	if err != nil {
 		fmt.Printf("Error opening device %s: %v", deviceName, err)
-		lck.Unlock()
 	} else {
 		// Start processing packets
 		packetSource := gopacket.NewPacketSource(handle, handle.LinkType())
-		lck.Unlock()
 		for {
 			packetSourceChane := packetSource.Packets()
 			select {

@@ -1,11 +1,11 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"github.com/google/gopacket/pcap"
-	"github.com/wenwu-bianjie/gopacket/parsePackets/engine"
-	"github.com/wenwu-bianjie/gopacket/parsePackets/scheduler"
-
+	"github.com/wenwu-bianjie/gopacket/fasterParsePackets/engine"
+	"github.com/wenwu-bianjie/gopacket/fasterParsePackets/writeJson"
 	"log"
 	"os"
 	"time"
@@ -34,11 +34,13 @@ func main() {
 	}
 	defer file_fd.Close()
 
-	e := engine.ToJsonEngine{
-		Scheduler:   &scheduler.QueuedScheduler{},
-		WorkerCount: 1,
-	}
-	e.Run(handle, file_fd)
+	newWriter := bufio.NewWriterSize(file_fd, 1024*1024)
+	defer newWriter.Flush()
+	defer writeJson.KafkaProducer.Close()
+
+	e := engine.FasterEngine{}
+	e.Run(handle, newWriter, file_fd.Name())
+
 	t2 := time.Now()
 	fmt.Println(t2.Sub(t1))
 }
