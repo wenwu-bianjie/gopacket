@@ -24,10 +24,11 @@ func (e *FasterEngine) Run(handle *pcap.Handle, w *bufio.Writer, fileName string
 
 func forEachPackets(handle *pcap.Handle, w *bufio.Writer, fileName string) {
 	var frame int64
+
 	for {
 		data, ci, err := handle.ReadPacketData()
-		frame++
 		if err == nil {
+			frame++
 			writeJson.WritePacketjson(data, w, frame, fileName, ci.Timestamp, ci.CaptureLength)
 			continue
 		}

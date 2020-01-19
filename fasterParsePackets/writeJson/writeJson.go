@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/Shopify/sarama"
-	"github.com/wenwu-bianjie/gopacket/fasterParsePackets/toKafka/producer"
+	"github.com/wenwu-bianjie/gopacket/fasterParsePackets/toKafka/syncProducer"
 )
 
 type Vidata struct {
@@ -43,29 +43,15 @@ type TCPFlags struct {
 	NS  bool `json:"NS"`
 }
 
-var KafkaProducer sarama.AsyncProducer
+var KafkaProducer sarama.SyncProducer
 var err error
-var kafkaProducerInput chan<- *sarama.ProducerMessage
 
 func init() {
-	KafkaProducer, err = producer.NewProducer()
+	KafkaProducer, err = syncProducer.NewProducer()
 	if err != nil {
 		fmt.Println("kafkaProducer ERROR")
 		panic(err)
 	}
-
-	kafkaProducerInput = KafkaProducer.Input()
-
-	go func(p sarama.AsyncProducer) {
-		for {
-			select {
-			case <-p.Successes():
-				fmt.Println("success")
-			case <-p.Errors():
-				fmt.Println("err")
-			}
-		}
-	}(KafkaProducer)
 }
 
 func write(tmpdate *Vidata, w *bufio.Writer) error {
@@ -80,8 +66,8 @@ func write(tmpdate *Vidata, w *bufio.Writer) error {
 	}
 	msg.Value = sarama.ByteEncoder(b)
 
-	kafkaProducerInput <- msg
-
+	_, _, err = KafkaProducer.SendMessage(msg)
+	fmt.Println(err)
 	//_, err = w.Write(b)
 	//if err != nil {
 	//	fmt.Println("Error", err)
