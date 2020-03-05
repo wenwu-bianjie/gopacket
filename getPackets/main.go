@@ -24,7 +24,13 @@ var (
 	pcapFile string = "./test4.pcap"
 )
 
-var filter = flag.String("f", "tcp", "BPF filter for pcap")
+//这样设置才能抓取本地报文
+//route add 192.168.1.103 mask 255.255.255.255 192.168.1.1 metric 1
+
+//抓完包记得删除设置
+//route delete 192.168.1.103 mask 255.255.255.255 192.168.1.1 metric 1
+
+var filter = flag.String("f", "tcp and port 6379", "BPF filter for pcap")
 
 func main() {
 	// Find all devices
@@ -41,10 +47,10 @@ func main() {
 	defer f.Close()
 
 	packetChan := make(chan gopacket.Packet)
-	last := len(devices) - 1
-	d := devices[last]
-	go getPacket(d.Name, packetChan)
 
+	for _, v := range devices {
+		go getPacket(v.Name, packetChan)
+	}
 	//for _, d := range devices {
 	//	fmt.Println("\nName: ", d.Name)
 	//	fmt.Println("Description: ", d.Description)
@@ -83,6 +89,7 @@ func getPacket(deviceName string, packetChan chan gopacket.Packet) {
 			packetSourceChane := packetSource.Packets()
 			select {
 			case packet := <-packetSourceChane:
+				fmt.Println(packet.Data())
 				packetChan <- packet
 			}
 		}
